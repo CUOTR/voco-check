@@ -4,7 +4,7 @@ import random
 import re
 
 # --- Cấu hình ---
-EXCEL_FILE = "1.Everyday language.xlsx"
+EXCEL_FILE = "Everyday language.xlsx"
 
 # --- Tiền xử lý ---
 def normalize(text):

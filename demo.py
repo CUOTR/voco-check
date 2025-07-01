@@ -19,6 +19,9 @@ def load_data(sheet_choice):
     for i in range(1, sheet_choice + 1):
         try:
             df = pd.read_excel(FILE_NAME, sheet_name=f"Sheet{i}")
+            if df.shape[1] < 4:
+                st.error(f"Sheet{i} không đủ cột cần thiết.")
+                continue
             df.columns = ['Vocabulary', 'Phonetic', 'Meaning', 'Example']
             df.dropna(inplace=True)
             for col in ['Vocabulary', 'Phonetic', 'Meaning', 'Example']:
@@ -58,7 +61,7 @@ st.set_page_config(page_title="Ứng dụng học từ vựng", layout="centered
 st.title("📝 CHƯƠNG TRÌNH HỌC TỪ VỰNG")
 
 # ====== Khởi tạo trạng thái ======
-for key in ['step', 'data', 'quiz1_indexes', 'quiz2_indexes', 'answers1', 'answers2']:
+for key in ['step', 'data', 'quiz1_indexes', 'quiz2_indexes', 'answers1', 'answers2', 'prompt1_types']:
     if key not in st.session_state:
         st.session_state[key] = None
 
@@ -103,7 +106,11 @@ elif st.session_state.step == 2:
         prompt = row[kind]
         key = f"q1_{i}"
         st.markdown(f"**{i}. {kind}**: {prompt}")
-        answers[key] = st.text_input("", value=answers.get(key, ""))
+        answers[key] = st.text_input(
+            label="Nhập nghĩa:",
+            value=answers.get(key, ""),
+            key=key
+        )
 
     if st.button("Kiểm tra kết quả"):
         st.session_state.answers1 = answers
@@ -140,6 +147,11 @@ elif st.session_state.step == 3:
     if st.button("Tiếp tục kiểm tra 2"):
         st.session_state.step = 4
         st.rerun()
+    
+    if st.button("🔄 Làm lại từ đầu"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
 
 # ====== Bước 4: Tạo kiểm tra 2 ======
 elif st.session_state.step == 4:
@@ -165,7 +177,11 @@ elif st.session_state.step == 5:
         row = df.iloc[idx]
         key = f"q2_{i}"
         st.markdown(f"**{i}. Nghĩa**: {row['Meaning']}")
-        answers[key] = st.text_input("", value=answers.get(key, ""))
+        answers[key] = st.text_input(
+            label="Nhập từ vựng:",
+            value=answers.get(key, ""),
+            key=key
+        )
 
     if st.button("Kiểm tra kết quả kiểm tra 2"):
         st.session_state.answers2 = answers
@@ -199,7 +215,7 @@ elif st.session_state.step == 6:
         for i, correct_ans, user_ans in wrong_list:
             st.write(f"- Câu {i}: Đáp án đúng: **{correct_ans}** | Bạn trả lời: `{user_ans}`")
 
-    if st.button("Làm lại từ đầu"):
+    if st.button("🔁 Làm lại từ đầu"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()

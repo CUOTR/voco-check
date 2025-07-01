@@ -105,13 +105,23 @@ elif st.session_state.step == 2:
     for i, idx in enumerate(st.session_state.quiz1_indexes, 1):
         row = df.iloc[idx]
         kind = st.session_state.prompt1_types[i - 1]
-        prompt = row[kind]
         key = f"q1_{i}"
-        answers[key] = st.text_input(f"{i}. {kind}: {prompt}", key=key, value=answers.get(key, ""))
 
-        if kind != "Example":
+        if kind == "Vocabulary":
+            st.markdown(f"**{i}. Từ vựng:** {row['Vocabulary']}")
+            answers[key] = st.text_input("", value=answers.get(key, ""), key=key)
             example = highlight_vocab(row["Example"], row["Vocabulary"])
             st.markdown(f"_Ví dụ_: {example}")
+
+        elif kind == "Phonetic":
+            st.markdown(f"**{i}. Phiên âm:** {row['Phonetic']}")
+            answers[key] = st.text_input("", value=answers.get(key, ""), key=key)
+            example = highlight_vocab(row["Example"], row["Vocabulary"])
+            st.markdown(f"_Ví dụ_: {example}")
+
+        elif kind == "Example":
+            st.markdown(f"**{i}. Example:** {row['Example']}")
+            answers[key] = st.text_input("", value=answers.get(key, ""), key=key)
 
     if st.button("Kiểm tra kết quả"):
         st.session_state.answers1 = answers
@@ -135,7 +145,10 @@ elif st.session_state.step == 3:
             wrong_list.append((i, row['Meaning'], st.session_state.answers1.get(key, "")))
 
     st.write(f"🎯 Bạn đã trả lời đúng {correct}/25 câu.")
-    st.success("🎉 Bạn đã vượt qua bài kiểm tra!") if correct >= 20 else st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
+    if correct >= 20:
+        st.success("🎉 Bạn đã vượt qua bài kiểm tra!")
+    else:
+        st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
 
     if wrong_list:
         st.write("### ❌ Những câu trả lời sai:")
@@ -169,7 +182,7 @@ elif st.session_state.step == 5:
     for i, idx in enumerate(st.session_state.quiz2_indexes, 1):
         row = df.iloc[idx]
         key = f"q2_{i}"
-        answers[key] = st.text_input(f"{i}. Nghĩa: {row['Meaning']}", key=key, value=answers.get(key, ""))
+        answers[key] = st.text_input(f"{i}. Nghĩa: {row['Meaning']}", value=answers.get(key, ""), key=key)
         example = highlight_vocab(row["Example"], row["Vocabulary"])
         st.markdown(f"_Ví dụ_: {example}")
 
@@ -195,7 +208,10 @@ elif st.session_state.step == 6:
             wrong_list.append((i, row['Vocabulary'], st.session_state.answers2.get(key, "")))
 
     st.write(f"🎯 Bạn đã trả lời đúng {correct}/25 câu.")
-    st.success("🎉 Bạn đã vượt qua bài kiểm tra!") if correct >= 20 else st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
+    if correct >= 20:
+        st.success("🎉 Bạn đã vượt qua bài kiểm tra!")
+    else:
+        st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
 
     if wrong_list:
         st.write("### ❌ Những câu trả lời sai:")

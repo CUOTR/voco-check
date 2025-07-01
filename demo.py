@@ -4,7 +4,10 @@ import random
 import re
 import datetime
 
+# ====== Cấu hình ======
 FILE_NAME = "Everyday language.xlsx"
+
+# ====== Hàm xử lý ======
 
 def normalize(text):
     if isinstance(text, str):
@@ -56,15 +59,16 @@ def log_user_action(action, data=""):
         f.write(f"[{timestamp}] {action} | {data}\n")
 
 # ====== Giao diện ======
+
 st.set_page_config(page_title="Ứng dụng học từ vựng", layout="centered")
 st.title("📝 CHƯƠNG TRÌNH HỌC TỪ VỰNG")
 
 # ====== Khởi tạo trạng thái ======
-for key in ['step', 'data', 'quiz1_indexes', 'quiz2_indexes', 'answers1', 'answers2', 'prompt1_types']:
+for key in ['step', 'data', 'quiz1_indexes', 'quiz2_indexes', 'answers1', 'answers2']:
     if key not in st.session_state:
         st.session_state[key] = None
 
-# ====== Bước 0 ======
+# ====== Bước 0: Chọn Sheet ======
 if st.session_state.step is None:
     sheet_num = st.number_input("Chọn số sheet muốn học (1–10):", min_value=1, max_value=10, step=1)
     if st.button("Bắt đầu"):
@@ -77,13 +81,13 @@ if st.session_state.step is None:
             st.session_state.step = 1
             st.rerun()
 
-# ====== Bước 1 ======
+# ====== Bước 1: Tạo kiểm tra 1 ======
 elif st.session_state.step == 1:
     st.subheader("📚 KIỂM TRA 1: Cho từ → Chọn nghĩa")
     df = st.session_state.data
     indexes = get_random_entries(df, exclude_idxs=set(), count=25)
     if len(indexes) < 25:
-        st.error("Không thể chọn đủ 25 câu hỏi hợp lệ.")
+        st.error("Không thể chọn đủ 25 câu hỏi hợp lệ. Dữ liệu có thể bị trùng lặp quá nhiều.")
     else:
         st.session_state.quiz1_indexes = indexes
         st.session_state.answers1 = {}
@@ -93,7 +97,7 @@ elif st.session_state.step == 1:
         st.session_state.step = 2
         st.rerun()
 
-# ====== Bước 2 ======
+# ====== Bước 2: Làm kiểm tra 1 ======
 elif st.session_state.step == 2:
     st.subheader("📚 KIỂM TRA 1: Trả lời các câu hỏi")
     df = st.session_state.data
@@ -103,21 +107,19 @@ elif st.session_state.step == 2:
         row = df.iloc[idx]
         kind = st.session_state.prompt1_types[i - 1]
         prompt = row[kind]
-key = f"q1_{i}"
-answers[key] = st.text_input(f"{i}. {kind}: {prompt}", value=answers.get(key, ""))
+        key = f"q1_{i}"
+        answers[key] = st.text_input(f"{i}. {kind}: {prompt}", value=answers.get(key, ""))
 
-# Chỉ hiển thị ví dụ nếu prompt KHÔNG PHẢI là Example
-if kind != "Example":
-    example = highlight_vocab(row["Example"], row["Vocabulary"])
-    st.markdown(f"_Ví dụ_: {example}")
-
+        if kind != "Example":
+            example = highlight_vocab(row["Example"], row["Vocabulary"])
+            st.markdown(f"_Ví dụ_: {example}")
 
     if st.button("Kiểm tra kết quả"):
         st.session_state.answers1 = answers
         st.session_state.step = 3
         st.rerun()
 
-# ====== Bước 3 ======
+# ====== Bước 3: Kết quả kiểm tra 1 ======
 elif st.session_state.step == 3:
     st.subheader("✅ KẾT QUẢ KIỂM TRA 1")
     df = st.session_state.data
@@ -134,7 +136,10 @@ elif st.session_state.step == 3:
             wrong_list.append((i, row['Meaning'], st.session_state.answers1.get(key, "")))
 
     st.write(f"🎯 Bạn đã trả lời đúng {correct}/25 câu.")
-    st.success("🎉 Bạn đã vượt qua bài kiểm tra!") if correct >= 20 else st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
+    if correct >= 20:
+        st.success("🎉 Bạn đã vượt qua bài kiểm tra!")
+    else:
+        st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
 
     if wrong_list:
         st.write("### ❌ Những câu trả lời sai:")
@@ -145,21 +150,21 @@ elif st.session_state.step == 3:
         st.session_state.step = 4
         st.rerun()
 
-# ====== Bước 4 ======
+# ====== Bước 4: Tạo kiểm tra 2 ======
 elif st.session_state.step == 4:
     st.subheader("📘 KIỂM TRA 2: Cho nghĩa → Chọn từ")
     df = st.session_state.data
     used = set(st.session_state.quiz1_indexes)
     indexes = get_random_entries(df, exclude_idxs=used, count=25)
     if len(indexes) < 25:
-        st.error("Không thể chọn đủ 25 câu hỏi hợp lệ.")
+        st.error("Không thể chọn đủ 25 câu hỏi hợp lệ cho kiểm tra 2.")
     else:
         st.session_state.quiz2_indexes = indexes
         st.session_state.answers2 = {}
         st.session_state.step = 5
         st.rerun()
 
-# ====== Bước 5 ======
+# ====== Bước 5: Làm kiểm tra 2 ======
 elif st.session_state.step == 5:
     st.subheader("📘 KIỂM TRA 2: Trả lời các câu hỏi")
     df = st.session_state.data
@@ -169,18 +174,15 @@ elif st.session_state.step == 5:
         row = df.iloc[idx]
         key = f"q2_{i}"
         answers[key] = st.text_input(f"{i}. Nghĩa: {row['Meaning']}", value=answers.get(key, ""))
-
-# Chỉ hiển thị ví dụ nếu nó KHÁC hoàn toàn với dòng nghĩa
-if normalize(row["Meaning"]) not in normalize(row["Example"]):
-    example = highlight_vocab(row["Example"], row["Vocabulary"])
-    st.markdown(f"_Ví dụ_: {example}")
+        example = highlight_vocab(row["Example"], row["Vocabulary"])
+        st.markdown(f"_Ví dụ_: {example}")
 
     if st.button("Kiểm tra kết quả kiểm tra 2"):
         st.session_state.answers2 = answers
         st.session_state.step = 6
         st.rerun()
 
-# ====== Bước 6 ======
+# ====== Bước 6: Kết quả kiểm tra 2 ======
 elif st.session_state.step == 6:
     st.subheader("✅ KẾT QUẢ KIỂM TRA 2")
     df = st.session_state.data
@@ -197,7 +199,10 @@ elif st.session_state.step == 6:
             wrong_list.append((i, row['Vocabulary'], st.session_state.answers2.get(key, "")))
 
     st.write(f"🎯 Bạn đã trả lời đúng {correct}/25 câu.")
-    st.success("🎉 Bạn đã vượt qua bài kiểm tra!") if correct >= 20 else st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
+    if correct >= 20:
+        st.success("🎉 Bạn đã vượt qua bài kiểm tra!")
+    else:
+        st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
 
     if wrong_list:
         st.write("### ❌ Những câu trả lời sai:")

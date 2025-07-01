@@ -109,7 +109,15 @@ elif st.session_state.step == 2:
         kind = st.session_state.prompt1_types[i - 1]
         prompt = row[kind]
         key = f"q1_{i}"
-        answers[key] = st.text_input(f"{i}. {kind}: {prompt}", value=answers.get(key, ""))
+
+        label_map = {
+            "Vocabulary": "Từ vựng",
+            "Phonetic": "Phiên âm",
+            "Example": "Ví dụ"
+        }
+
+        st.markdown(f"**{i}. {label_map[kind]}:** {prompt}")
+        answers[key] = st.text_input("", value=answers.get(key, ""), key=key)
 
         if kind != "Example":
             example = highlight_vocab(row["Example"], row["Vocabulary"])

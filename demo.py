@@ -14,13 +14,6 @@ def normalize(text):
         return re.sub(r'\s+', ' ', text.strip().lower())
     return ""
 
-def highlight_vocab(example, vocab):
-    if not isinstance(example, str) or not isinstance(vocab, str):
-        return example
-    words = vocab.strip().lower().split()
-    pattern = r'(' + r'\s+'.join(re.escape(w) for w in words) + r')'
-    return re.sub(pattern, r"**\\1**", example, flags=re.IGNORECASE)
-
 def load_data(sheet_choice):
     dfs = []
     for i in range(1, sheet_choice + 1):

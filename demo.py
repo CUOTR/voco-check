@@ -102,8 +102,13 @@ elif st.session_state.step == 2:
     answers = st.session_state.answers1
     for i, idx in enumerate(st.session_state.quiz1_indexes, 1):
         row = df.iloc[idx]
-        kind = random.choice(["Vocabulary", "Phonetic", "Example"])
-        prompt = row[kind]
+       if "prompt1_types" not in st.session_state:
+    st.session_state.prompt1_types = [
+        random.choice(["Vocabulary", "Phonetic", "Example"]) for _ in st.session_state.quiz1_indexes
+    ]
+
+kind = st.session_state.prompt1_types[i - 1]
+prompt = row[kind]
         key = f"q1_{i}"
         answers[key] = st.text_input(f"{i}. {kind}: {prompt}", value=answers.get(key, ""))
 

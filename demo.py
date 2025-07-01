@@ -52,12 +52,23 @@ st.set_page_config(page_title="Ứng dụng học từ vựng", layout="centered
 st.title("📝 CHƯƠNG TRÌNH HỌC TỪ VỰNG")
 
 # ====== Khởi tạo trạng thái ======
-for key in ['step', 'data', 'quiz1_indexes', 'quiz2_indexes', 'answers1', 'answers2']:
-    if key not in st.session_state:
-        st.session_state[key] = None
+if "step" not in st.session_state:
+    st.session_state.step = 0
+if "data" not in st.session_state:
+    st.session_state.data = pd.DataFrame()
+if "quiz1_indexes" not in st.session_state:
+    st.session_state.quiz1_indexes = []
+if "quiz2_indexes" not in st.session_state:
+    st.session_state.quiz2_indexes = []
+if "answers1" not in st.session_state:
+    st.session_state.answers1 = {}
+if "answers2" not in st.session_state:
+    st.session_state.answers2 = {}
+if "prompt1_types" not in st.session_state:
+    st.session_state.prompt1_types = []
 
 # ====== Bước 0: Chọn Sheet ======
-if st.session_state.step is None:
+if st.session_state.step == 0:
     sheet_num = st.number_input("Chọn số sheet muốn học (1–10):", min_value=1, max_value=10, step=1)
     if st.button("Bắt đầu"):
         df = load_data(sheet_num)
@@ -119,7 +130,10 @@ elif st.session_state.step == 3:
             wrong_list.append((i, row['Meaning'], st.session_state.answers1.get(key, "")))
 
     st.write(f"🎯 Bạn đã trả lời đúng {correct}/25 câu.")
-    st.success("🎉 Bạn đã vượt qua bài kiểm tra!") if correct >= 20 else st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
+    if correct >= 20:
+        st.success("🎉 Bạn đã vượt qua bài kiểm tra!")
+    else:
+        st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
 
     if wrong_list:
         st.write("### ❌ Những câu trả lời sai:")
@@ -177,7 +191,10 @@ elif st.session_state.step == 6:
             wrong_list.append((i, row['Vocabulary'], st.session_state.answers2.get(key, "")))
 
     st.write(f"🎯 Bạn đã trả lời đúng {correct}/25 câu.")
-    st.success("🎉 Bạn đã vượt qua bài kiểm tra!") if correct >= 20 else st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
+    if correct >= 20:
+        st.success("🎉 Bạn đã vượt qua bài kiểm tra!")
+    else:
+        st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
 
     if wrong_list:
         st.write("### ❌ Những câu trả lời sai:")

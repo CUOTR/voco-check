@@ -18,7 +18,7 @@ def highlight_vocab(example, vocab):
     if not isinstance(example, str) or not isinstance(vocab, str):
         return example
     words = vocab.strip().lower().split()
-    pattern = r'(' + r'\\s+'.join(re.escape(w) for w in words) + r')'
+    pattern = r'(' + r'\\b' + r'\\s*'.join(re.escape(w) for w in words) + r'\\b)'
     return re.sub(pattern, r"**\\1**", example, flags=re.IGNORECASE)
 
 def load_data(sheet_choice):
@@ -105,15 +105,13 @@ elif st.session_state.step == 2:
     for i, idx in enumerate(st.session_state.quiz1_indexes, 1):
         row = df.iloc[idx]
         kind = st.session_state.prompt1_types[i - 1]
+        prompt = row[kind]
         key = f"q1_{i}"
-        if kind == "Vocabulary":
-            st.markdown(f"**{i}. Từ vựng:** {row['Vocabulary']}")
-        elif kind == "Phonetic":
-            st.markdown(f"**{i}. Phiên âm:** {row['Phonetic']}")
-        else:
-            st.markdown(f"**{i}. Ví dụ:** {highlight_vocab(row['Example'], row['Vocabulary'])}")
+        answers[key] = st.text_input(f"{i}. {kind}: {prompt}", key=key, value=answers.get(key, ""))
 
-        answers[key] = st.text_input("", value=answers.get(key, ""))
+        if kind != "Example":
+            example = highlight_vocab(row["Example"], row["Vocabulary"])
+            st.markdown(f"_Ví dụ_: {example}")
 
     if st.button("Kiểm tra kết quả"):
         st.session_state.answers1 = answers
@@ -137,10 +135,7 @@ elif st.session_state.step == 3:
             wrong_list.append((i, row['Meaning'], st.session_state.answers1.get(key, "")))
 
     st.write(f"🎯 Bạn đã trả lời đúng {correct}/25 câu.")
-    if correct >= 20:
-        st.success("🎉 Bạn đã vượt qua bài kiểm tra!")
-    else:
-        st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
+    st.success("🎉 Bạn đã vượt qua bài kiểm tra!") if correct >= 20 else st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
 
     if wrong_list:
         st.write("### ❌ Những câu trả lời sai:")
@@ -174,9 +169,8 @@ elif st.session_state.step == 5:
     for i, idx in enumerate(st.session_state.quiz2_indexes, 1):
         row = df.iloc[idx]
         key = f"q2_{i}"
-        st.markdown(f"{i}. Nghĩa: {row['Meaning']}")
-        answers[key] = st.text_input("", value=answers.get(key, ""))
-        example = highlight_vocab(row['Example'], row['Vocabulary'])
+        answers[key] = st.text_input(f"{i}. Nghĩa: {row['Meaning']}", key=key, value=answers.get(key, ""))
+        example = highlight_vocab(row["Example"], row["Vocabulary"])
         st.markdown(f"_Ví dụ_: {example}")
 
     if st.button("Kiểm tra kết quả kiểm tra 2"):
@@ -201,10 +195,7 @@ elif st.session_state.step == 6:
             wrong_list.append((i, row['Vocabulary'], st.session_state.answers2.get(key, "")))
 
     st.write(f"🎯 Bạn đã trả lời đúng {correct}/25 câu.")
-    if correct >= 20:
-        st.success("🎉 Bạn đã vượt qua bài kiểm tra!")
-    else:
-        st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
+    st.success("🎉 Bạn đã vượt qua bài kiểm tra!") if correct >= 20 else st.warning("❌ Bạn chưa vượt qua bài kiểm tra.")
 
     if wrong_list:
         st.write("### ❌ Những câu trả lời sai:")

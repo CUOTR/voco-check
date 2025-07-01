@@ -18,7 +18,7 @@ def highlight_vocab(example, vocab):
     if not isinstance(example, str) or not isinstance(vocab, str):
         return example
     words = vocab.strip().lower().split()
-    pattern = r'(' + r'\s+'.join(re.escape(w) for w in words) + r')'
+    pattern = r'(' + r'\\s+'.join(re.escape(w) for w in words) + r')'
     return re.sub(pattern, r"**\\1**", example, flags=re.IGNORECASE)
 
 def load_data(sheet_choice):
@@ -92,9 +92,7 @@ elif st.session_state.step == 1:
     else:
         st.session_state.quiz1_indexes = indexes
         st.session_state.answers1 = {}
-        st.session_state.prompt1_types = [
-            random.choice(["Vocabulary", "Phonetic", "Example"]) for _ in indexes
-        ]
+        st.session_state.prompt1_types = [random.choice(["Vocabulary", "Phonetic", "Example"]) for _ in indexes]
         st.session_state.step = 2
         st.rerun()
 
@@ -107,21 +105,15 @@ elif st.session_state.step == 2:
     for i, idx in enumerate(st.session_state.quiz1_indexes, 1):
         row = df.iloc[idx]
         kind = st.session_state.prompt1_types[i - 1]
-        prompt = row[kind]
         key = f"q1_{i}"
+        if kind == "Vocabulary":
+            st.markdown(f"**{i}. Từ vựng:** {row['Vocabulary']}")
+        elif kind == "Phonetic":
+            st.markdown(f"**{i}. Phiên âm:** {row['Phonetic']}")
+        else:
+            st.markdown(f"**{i}. Ví dụ:** {highlight_vocab(row['Example'], row['Vocabulary'])}")
 
-        label_map = {
-            "Vocabulary": "Từ vựng",
-            "Phonetic": "Phiên âm",
-            "Example": "Ví dụ"
-        }
-
-        st.markdown(f"**{i}. {label_map[kind]}:** {prompt}")
-        answers[key] = st.text_input("", value=answers.get(key, ""), key=key)
-
-        if kind != "Example":
-            example = highlight_vocab(row["Example"], row["Vocabulary"])
-            st.markdown(f"_Ví dụ_: {example}")
+        answers[key] = st.text_input("", value=answers.get(key, ""))
 
     if st.button("Kiểm tra kết quả"):
         st.session_state.answers1 = answers
@@ -182,8 +174,9 @@ elif st.session_state.step == 5:
     for i, idx in enumerate(st.session_state.quiz2_indexes, 1):
         row = df.iloc[idx]
         key = f"q2_{i}"
-        answers[key] = st.text_input(f"{i}. Nghĩa: {row['Meaning']}", value=answers.get(key, ""))
-        example = highlight_vocab(row["Example"], row["Vocabulary"])
+        st.markdown(f"{i}. Nghĩa: {row['Meaning']}")
+        answers[key] = st.text_input("", value=answers.get(key, ""))
+        example = highlight_vocab(row['Example'], row['Vocabulary'])
         st.markdown(f"_Ví dụ_: {example}")
 
     if st.button("Kiểm tra kết quả kiểm tra 2"):

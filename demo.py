@@ -49,27 +49,15 @@ def get_random_entries(df, exclude_idxs, count):
 # ====== Giao diện ======
 
 st.set_page_config(page_title="Ứng dụng học từ vựng", layout="centered")
-
 st.title("📝 CHƯƠNG TRÌNH HỌC TỪ VỰNG")
 
 # ====== Khởi tạo trạng thái ======
-
-if "step" not in st.session_state:
-    st.session_state.step = 0
-if "data" not in st.session_state:
-    st.session_state.data = pd.DataFrame()
-if "quiz1_indexes" not in st.session_state:
-    st.session_state.quiz1_indexes = []
-if "quiz2_indexes" not in st.session_state:
-    st.session_state.quiz2_indexes = []
-if "answers1" not in st.session_state:
-    st.session_state.answers1 = {}
-if "answers2" not in st.session_state:
-    st.session_state.answers2 = {}
+for key in ['step', 'data', 'quiz1_indexes', 'quiz2_indexes', 'answers1', 'answers2']:
+    if key not in st.session_state:
+        st.session_state[key] = None
 
 # ====== Bước 0: Chọn Sheet ======
-
-if st.session_state.step == 0:
+if st.session_state.step is None:
     sheet_num = st.number_input("Chọn số sheet muốn học (1–10):", min_value=1, max_value=10, step=1)
     if st.button("Bắt đầu"):
         df = load_data(sheet_num)
@@ -81,7 +69,6 @@ if st.session_state.step == 0:
             st.rerun()
 
 # ====== Bước 1: Tạo kiểm tra 1 ======
-
 elif st.session_state.step == 1:
     st.subheader("📚 KIỂM TRA 1: Cho từ → Chọn nghĩa")
     df = st.session_state.data
@@ -91,22 +78,20 @@ elif st.session_state.step == 1:
     else:
         st.session_state.quiz1_indexes = indexes
         st.session_state.answers1 = {}
+        st.session_state.prompt1_types = [
+            random.choice(["Vocabulary", "Phonetic", "Example"]) for _ in indexes
+        ]
         st.session_state.step = 2
         st.rerun()
 
 # ====== Bước 2: Làm kiểm tra 1 ======
-
 elif st.session_state.step == 2:
     st.subheader("📚 KIỂM TRA 1: Trả lời các câu hỏi")
     df = st.session_state.data
     answers = st.session_state.answers1
+
     for i, idx in enumerate(st.session_state.quiz1_indexes, 1):
         row = df.iloc[idx]
-    if "prompt1_types" not in st.session_state:
-    st.session_state.prompt1_types = [
-        random.choice(["Vocabulary", "Phonetic", "Example"]) for _ in st.session_state.quiz1_indexes
-    ]
-
         kind = st.session_state.prompt1_types[i - 1]
         prompt = row[kind]
         key = f"q1_{i}"
@@ -118,12 +103,12 @@ elif st.session_state.step == 2:
         st.rerun()
 
 # ====== Bước 3: Kết quả kiểm tra 1 ======
-
 elif st.session_state.step == 3:
     st.subheader("✅ KẾT QUẢ KIỂM TRA 1")
     df = st.session_state.data
     correct = 0
     wrong_list = []
+
     for i, idx in enumerate(st.session_state.quiz1_indexes, 1):
         row = df.iloc[idx]
         key = f"q1_{i}"
@@ -146,7 +131,6 @@ elif st.session_state.step == 3:
         st.rerun()
 
 # ====== Bước 4: Tạo kiểm tra 2 ======
-
 elif st.session_state.step == 4:
     st.subheader("📘 KIỂM TRA 2: Cho nghĩa → Chọn từ")
     df = st.session_state.data
@@ -161,11 +145,11 @@ elif st.session_state.step == 4:
         st.rerun()
 
 # ====== Bước 5: Làm kiểm tra 2 ======
-
 elif st.session_state.step == 5:
     st.subheader("📘 KIỂM TRA 2: Trả lời các câu hỏi")
     df = st.session_state.data
     answers = st.session_state.answers2
+
     for i, idx in enumerate(st.session_state.quiz2_indexes, 1):
         row = df.iloc[idx]
         key = f"q2_{i}"
@@ -177,12 +161,12 @@ elif st.session_state.step == 5:
         st.rerun()
 
 # ====== Bước 6: Kết quả kiểm tra 2 ======
-
 elif st.session_state.step == 6:
     st.subheader("✅ KẾT QUẢ KIỂM TRA 2")
     df = st.session_state.data
     correct = 0
     wrong_list = []
+
     for i, idx in enumerate(st.session_state.quiz2_indexes, 1):
         row = df.iloc[idx]
         key = f"q2_{i}"

@@ -107,8 +107,8 @@ elif st.session_state.step == 2:
         random.choice(["Vocabulary", "Phonetic", "Example"]) for _ in st.session_state.quiz1_indexes
     ]
 
-kind = st.session_state.prompt1_types[i - 1]
-prompt = row[kind]
+        kind = st.session_state.prompt1_types[i - 1]
+        prompt = row[kind]
         key = f"q1_{i}"
         answers[key] = st.text_input(f"{i}. {kind}: {prompt}", value=answers.get(key, ""))
 

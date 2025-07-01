@@ -103,10 +103,14 @@ elif st.session_state.step == 2:
         row = df.iloc[idx]
         kind = st.session_state.prompt1_types[i - 1]
         prompt = row[kind]
-        key = f"q1_{i}"
-        answers[key] = st.text_input(f"{i}. {kind}: {prompt}", value=answers.get(key, ""))
-        example = highlight_vocab(row["Example"], row["Vocabulary"])
-        st.markdown(f"_Ví dụ_: {example}")
+key = f"q1_{i}"
+answers[key] = st.text_input(f"{i}. {kind}: {prompt}", value=answers.get(key, ""))
+
+# Chỉ hiển thị ví dụ nếu prompt KHÔNG PHẢI là Example
+if kind != "Example":
+    example = highlight_vocab(row["Example"], row["Vocabulary"])
+    st.markdown(f"_Ví dụ_: {example}")
+
 
     if st.button("Kiểm tra kết quả"):
         st.session_state.answers1 = answers
@@ -164,9 +168,12 @@ elif st.session_state.step == 5:
     for i, idx in enumerate(st.session_state.quiz2_indexes, 1):
         row = df.iloc[idx]
         key = f"q2_{i}"
-        answers[key] = st.text_input(f"{i}. Nghĩa: {row['Meaning']}", value=answers.get(key, ""))
-        example = highlight_vocab(row["Example"], row["Vocabulary"])
-        st.markdown(f"_Ví dụ_: {example}")
+       answers[key] = st.text_input(f"{i}. Nghĩa: {row['Meaning']}", value=answers.get(key, ""))
+
+# Chỉ hiển thị ví dụ nếu nó KHÁC hoàn toàn với dòng nghĩa
+if normalize(row["Meaning"]) not in normalize(row["Example"]):
+    example = highlight_vocab(row["Example"], row["Vocabulary"])
+    st.markdown(f"_Ví dụ_: {example}")
 
     if st.button("Kiểm tra kết quả kiểm tra 2"):
         st.session_state.answers2 = answers

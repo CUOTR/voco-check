@@ -102,7 +102,7 @@ elif st.session_state.step == 2:
     answers = st.session_state.answers1
     for i, idx in enumerate(st.session_state.quiz1_indexes, 1):
         row = df.iloc[idx]
-       if "prompt1_types" not in st.session_state:
+    if "prompt1_types" not in st.session_state:
     st.session_state.prompt1_types = [
         random.choice(["Vocabulary", "Phonetic", "Example"]) for _ in st.session_state.quiz1_indexes
     ]

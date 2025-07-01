@@ -4,7 +4,7 @@ import random
 import re
 
 # ====== Cấu hình ======
-FILE_NAME = "1.Everyday language.xlsx"
+FILE_NAME = "Everyday language.xlsx"
 
 # ====== Hàm xử lý ======
 

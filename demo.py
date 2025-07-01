@@ -168,7 +168,7 @@ elif st.session_state.step == 5:
     for i, idx in enumerate(st.session_state.quiz2_indexes, 1):
         row = df.iloc[idx]
         key = f"q2_{i}"
-       answers[key] = st.text_input(f"{i}. Nghĩa: {row['Meaning']}", value=answers.get(key, ""))
+        answers[key] = st.text_input(f"{i}. Nghĩa: {row['Meaning']}", value=answers.get(key, ""))
 
 # Chỉ hiển thị ví dụ nếu nó KHÁC hoàn toàn với dòng nghĩa
 if normalize(row["Meaning"]) not in normalize(row["Example"]):

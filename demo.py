@@ -67,7 +67,7 @@ for key in ['step', 'data', 'quiz1_indexes', 'quiz2_indexes', 'answers1', 'answe
 
 # ====== Bước 0: Chọn Sheet ======
 if st.session_state.step is None:
-    sheet_num = st.number_input("Chọn số sheet muốn học (1–10):", min_value=1, max_value=10, step=1)
+    sheet_num = st.number_input("Chọn số buổi học muốn kiểm tra:", min_value=1, max_value=20, step=1)
     if st.button("Bắt đầu"):
         log_user_action("Bắt đầu học", f"Sheet {sheet_num}")
         df = load_data(sheet_num)

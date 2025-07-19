@@ -73,14 +73,17 @@ if st.session_state.step is None:
         log_user_action("Bắt đầu học", f"Sheet {sheet_num}")
         st.session_state.sheet_chosen = sheet_num
         st.session_state.data = load_data([sheet_num])
+        
         if sheet_num > 1:
             st.session_state.data_previous = load_data(range(1, sheet_num))
+            st.session_state.step = 0  # Kiểm tra tổng hợp trước
         else:
             st.session_state.data_previous = pd.DataFrame()
+            st.session_state.step = 1  # Bỏ qua kiểm tra tổng hợp nếu là buổi đầu
+        
         if len(st.session_state.data) < 50:
             st.error("Không đủ dữ liệu để tạo 2 bài kiểm tra.")
         else:
-            st.session_state.step = 0
             st.rerun()
 
 # ====== Bước 1: Bài kiểm tra tổng hợp (quiz 0) ======
